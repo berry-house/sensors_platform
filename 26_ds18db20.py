@@ -5,6 +5,8 @@
 #		replace the 28-XXXXXXXXX as yours.
 #----------------------------------------------------------------
 import os
+import requests
+url = "http://localhost:8000/broker/temperature"
 
 ds18b20 = ''
 
@@ -30,6 +32,16 @@ def loop():
 	while True:
 		if read() != None:
 			print "Current temperature : %0.3f C" % read()
+			data = {
+			    "id": 1,
+			    "timestamp": 1516740522,
+			    "temperature": read(),
+			}
+			resp = requests.post(url, json=data)
+			print(" URL:\t\t%s" % resp.url)
+			print(" encoding:\t%s" % resp.encoding)
+			print(" status_code:\t%s" % resp.status_code)
+			print(" text:\t\t%s" % resp.text)
 
 def destroy():
 	pass
