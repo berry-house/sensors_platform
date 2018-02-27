@@ -1,20 +1,23 @@
 # sensors_platform
 Raspberry Pi sensors and data processing.
 ## Raspberry Pi setup
-Circuit:<br/>
-![circuit](https://www.sunfounder.com/media/wysiwyg/swatches/sensor_kit_v2_0_for_b_plus/lesson-26-ds18b20-temperature-sensor/ds18b202.png)<br/>
-Add the following to the bottom of */boot/config.txt*
+First, you should change the configuration of your Raspberry Pi to support these sensors. And for that, you should open the terminal and run:
 ```
-dtoverlay=w1-gpio
+echo “dtoverlay=w1-gpio” >> /boot/config.txt
+sudo raspi-config
 ```
-Then reboot. After rebooting, type these commands to mount the device drivers and confirm whether the device is effective or not:
+After that, you will see a screen similar to this. We’ll proceed to enable the I2C interface on your Raspberry Pi:
+![raspi_config](img/raspi_config.png)<br/>
+Select “Interfacing Options” and then “I2C”. The screen will ask if you want the ARM I2C interface to be enabled. Select “Yes”, “Ok” and “Finish” to return to the command line.<br/>
+<br/>
+Now we need to install some utilities. For that, run
 ```
-sudo modprobe w1-gpio
-sudo modprobe w1-therm
+sudo apt-get update
+sudo apt-get install -y python-smbus i2c-tools
 ```
-Then, change directory to location */sys/bus/w1/devices/*<br/>
-Once there, you should see a directory with name similar to *28-031554cff6ff* (the serial number of your particular ds18db20). Now, to check the current temperature with Python, we'll use the Python code in this repository and run
+Reboot your Raspberry Pi to load the I2C module. Now we should be able to check if the i2c module is running, with the command:
 ```
-sudo puthon 26_ds18db20.py
+lsmod | grep i2c_
 ```
-The current temperature will be displayed on the screen.
+## Circuit
+...
