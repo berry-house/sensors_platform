@@ -3,7 +3,7 @@ import PCF8591 as ADC
 import time
 import os
 import requests
-#url = "http://localhost:8000/broker/temperature"
+import calendar
 url = "http://35.230.39.10:80/broker/temperature"
 
 DHTPIN = 17
@@ -128,7 +128,7 @@ def main():
 			print "Light:%s  Humidity: %s %%,  Temperature: %s C`" % (ADC.read(0), humidity, temperature)
 			data = {
 				"id": 1,
-				"timestamp": 1516740522,
+				"timestamp": calendar.timegm(time.gmtime()),
 				"temperature": temperature,
 			}
 			resp = requests.post(url, json=data)
@@ -136,7 +136,7 @@ def main():
 			print(" encoding:\t%s" % resp.encoding)
 			print(" status_code:\t%s" % resp.status_code)
 			print(" text:\t\t%s" % resp.text)
-		time.sleep(1)
+		time.sleep(2)
 
 
 def destroy():

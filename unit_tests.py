@@ -1,5 +1,7 @@
 import unittest
 import requests
+import calendar
+import time
 
 # url = "http://10.43.33.230:8000/broker/temperature"
 # url = "http://localhost:8000/broker/temperature"
@@ -7,19 +9,14 @@ import requests
 url = "http://35.230.39.10/broker/temperature"
 validId = 1
 invalidId = 6
-validTimestamp = 1516740562
 validTemperature = 27.7
 invalidTemperature = -200
 
 
-def suma(a, b):
-    return a+b
-
-
-def send_to_database(id, timestamp, temperature):
+def send_to_database(id, temperature):
     data = {
         "id": id,
-        "timestamp": validTimestamp,
+        "timestamp": calendar.timegm(time.gmtime()),
         "temperature": temperature,
     }
     resp = requests.post(url, json=data)
@@ -27,17 +24,14 @@ def send_to_database(id, timestamp, temperature):
 
 
 class LearningCase(unittest.TestCase):
-    def test_positive_numbers(self):
-        self.assertEqual(suma(2, 3), 5)
-
     def test_correct_values(self):
-        self.assertEqual(send_to_database(validId, validTimestamp, validTemperature), "OK.\n")
+        self.assertEqual(send_to_database(validId, validTemperature), "OK.\n")
 
     def test_invalid_id(self):
-        self.assertEqual(send_to_database(invalidId, validTimestamp, validTemperature), "Invalid ID.\n")
+        self.assertEqual(send_to_database(invalidId, validTemperature), "Invalid ID.\n")
 
     def test_invalid_temperature(self):
-        self.assertEqual(send_to_database(validId, validTimestamp, invalidTemperature), "Invalid temperature.\n")
+        self.assertEqual(send_to_database(validId, invalidTemperature), "Invalid temperature.\n")
 
 
 def main():
