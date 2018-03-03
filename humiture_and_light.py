@@ -4,6 +4,8 @@ import time
 import os
 import requests
 import calendar
+import tweepy
+import json
 url = "http://35.230.39.10:80/broker/temperature"
 
 DHTPIN = 17
@@ -116,8 +118,26 @@ def read_dht11_dat():
 	return the_bytes[0], the_bytes[2]
 
 
+def get_api(cfg):
+  auth = tweepy.OAuthHandler(cfg['consumer_key'], cfg['consumer_secret'])
+  auth.set_access_token(cfg['access_token'], cfg['access_token_secret'])
+  return tweepy.API(auth)
+
+
+
 def main():
 	print "Berry House sensors platform!\n"
+
+	with open('twitter_secret.json') as json_secret_file:
+		data = json.load(json_secret_file)
+	cfg = {
+		"consumer_key"        : data['consumer_key'],
+		"consumer_secret"     : data['consumer_secret'],
+		"access_token"        : data['access_token'],
+		"access_token_secret" : data['access_token_secret']
+	}
+	api = get_api(cfg)
+
 	status = 1
 	readings = open("readings.txt","w")
 	initialTime = calendar.timegm(time.gmtime())
@@ -139,8 +159,10 @@ def main():
 			totalLight += int(ADC.read(0))
 			count += 1
 			if(int(calendar.timegm(time.gmtime())) >= int(initialTime)+period):
-				print("For the past %d minute, I've been at around %0.2fC, with light intensity of %0.2f and humidity of %0.2f%%. Quite nice." % (period/60, totalTemperature/count, totalLight/count, totalHumidity/count))
-				readings.write("For the past %d minute, I've been at around %0.2fC, with light intensity of %0.2f and humidity of %0.2f%%. Quite nice." % (period/60, totalTemperature/count, totalLight/count, totalHumidity/count))
+				tweet = "For the past {:.0f} minute, I've been at around {:.2f}C, with light intensity of {:.2f} and humidity of {:.2f}%%. Quite nice.".format(period/60, totalTemperature/count, totalLight/count, totalHumidity/count)
+				status = api.update_status(status=tweet)
+				print(tweet)
+                readings.write(tweet + '\n')
 				initialTime = calendar.timegm(time.gmtime())
 				totalTemperature = 0.0
 				totalHumidity = 0
