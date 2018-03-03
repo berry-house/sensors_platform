@@ -117,8 +117,15 @@ def read_dht11_dat():
 
 
 def main():
-	print "Berry house sensors platform!\n"
+	print "Berry House sensors platform!\n"
 	status = 1
+	readings = open("readings.txt","w")
+	initialTime = calendar.timegm(time.gmtime())
+	period = 60 # 1 minute
+	totalTemperature = 0.0
+	totalHumidity = 0.0
+	totalLight = 0.0
+	count = 0
         while True:
                 #print 'Light: ', ADC.read(0)
                 #time.sleep(0.2)
@@ -126,16 +133,29 @@ def main():
 		if result:
 			humidity, temperature = result
 			print "Light:%s  Humidity: %s %%,  Temperature: %s C`" % (ADC.read(0), humidity, temperature)
+			readings.write("Light:%s  Humidity: %s %%,  Temperature: %s C`\n" % (ADC.read(0), humidity, temperature))
+			totalTemperature += int(temperature)
+			totalHumidity += int(humidity)
+			totalLight += int(ADC.read(0))
+			count += 1
+			if(int(calendar.timegm(time.gmtime())) >= int(initialTime)+period):
+				print("For the past %d minute, I've been at around %0.2fC, with light intensity of %0.2f and humidity of %0.2f%%. Quite nice." % (period/60, totalTemperature/count, totalLight/count, totalHumidity/count))
+				readings.write("For the past %d minute, I've been at around %0.2fC, with light intensity of %0.2f and humidity of %0.2f%%. Quite nice." % (period/60, totalTemperature/count, totalLight/count, totalHumidity/count))
+				initialTime = calendar.timegm(time.gmtime())
+				totalTemperature = 0.0
+				totalHumidity = 0
+				totalLight = 0
+				count = 0
 			data = {
 				"id": 1,
 				"timestamp": calendar.timegm(time.gmtime()),
 				"temperature": temperature,
 			}
 			resp = requests.post(url, json=data)
-			print(" URL:\t\t%s" % resp.url)
-			print(" encoding:\t%s" % resp.encoding)
-			print(" status_code:\t%s" % resp.status_code)
-			print(" text:\t\t%s" % resp.text)
+#			print(" URL:\t\t%s" % resp.url)
+#			print(" encoding:\t%s" % resp.encoding)
+#			print(" status_code:\t%s" % resp.status_code)
+#			print(" text:\t\t%s" % resp.text)
 		time.sleep(2)
 
 
