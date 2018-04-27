@@ -1,14 +1,9 @@
 import unittest
 import requests
-#import requests0 as requests
 import calendar
 import time
 
-# url = "http://10.43.33.230:8000/broker/temperature"
-# url = "http://localhost:8000/broker/temperature"
-# url = "https://localhost:443/broker/temperature"
-# url = "http://35.230.39.10/broker/temperature"
-url = "http://35.230.39.10/broker/status"
+url = "https://35.230.39.10:443/broker/status"
 validId = 1
 invalidId = 6
 validTemperature = 27
@@ -30,7 +25,7 @@ def send_to_database(id, temperature, humidity, light):
         "humidity": humidity,
         "light": light,
     }
-    resp = requests.post(url, json=data)
+    resp = requests.post(url, json=data, verify=False)
     return resp.text
 
 
